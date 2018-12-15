@@ -5,7 +5,7 @@ namespace API.Models
 
     public class Product
     {
-        public string Label { get; set; }
+        public long Id { get; set; }
 
         public string Name { get; set; }
 
