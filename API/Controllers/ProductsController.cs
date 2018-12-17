@@ -14,6 +14,12 @@ namespace API.Controllers
     {
         private readonly ProductContext context;
 
+        public ProductsController(ProductContext context)
+        {
+            this.context = context;
+        }
+
+
         // GET api/products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
@@ -43,25 +49,28 @@ namespace API.Controllers
             context.ProductItems.Add(item);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProductItem", new { id = item.Id }, item);
+            return item;
         }
 
-        // PUT api/products/5
+        // PUT api/products/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(long id, Product item)
+        public async Task<ActionResult<Product>> PutProduct(long id, Product item)
         {
-            if (id != item.Id)
-            {
-                return BadRequest();
-            }
+            var dbItem = await context.ProductItems.FindAsync(id);
 
-            context.Entry(item).State = EntityState.Modified;
+            context.Entry(dbItem).State = EntityState.Modified;
+            if (item.Name != null)
+                dbItem.Name = item.Name;
+            if (item.Price > 0)
+                dbItem.Price = item.Price;
+            if (item.Description != null)
+                dbItem.Description = item.Description;
             await context.SaveChangesAsync();
 
-            return NoContent();
+            return dbItem;
         }
 
-        // DELETE api/products/5
+        // DELETE api/products/1
         [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(long id)
         {

@@ -15,6 +15,6 @@ namespace API.Models
         {
         }
 
-        public DbSet<Product> TodoItems { get; set; }
+        public DbSet<Product> ProductItems { get; set; }
     }
 }
