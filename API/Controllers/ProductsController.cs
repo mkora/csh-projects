@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 using API.Models;
 
@@ -16,34 +16,65 @@ namespace API.Controllers
 
         // GET api/products
         [HttpGet]
-        public ActionResult<IEnumerable<string>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            return new string[] { "value1", "value2" };
+            return await context.ProductItems.ToListAsync();
         }
 
         // GET api/products/5
         [HttpGet("{id}")]
-        public ActionResult<string> GetProduct(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return "value";
+            var item = await context.ProductItems.FindAsync(id);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return item;
+
         }
 
         // POST api/products
         [HttpPost]
-        public void PostProduct([FromBody] string value)
+        public async Task<ActionResult<Product>> PostProduct(Product item)
         {
+            context.ProductItems.Add(item);
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction("GetProductItem", new { id = item.Id }, item);
         }
 
         // PUT api/products/5
         [HttpPut("{id}")]
-        public void PutProduct(int id, [FromBody] string value)
+        public async Task<IActionResult> PutProduct(long id, Product item)
         {
+            if (id != item.Id)
+            {
+                return BadRequest();
+            }
+
+            context.Entry(item).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         // DELETE api/products/5
         [HttpDelete("{id}")]
-        public void DeleteProduct(int id)
+        public async Task<ActionResult<Product>> DeleteProduct(long id)
         {
+            var item = await context.ProductItems.FindAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            context.ProductItems.Remove(item);
+            await context.SaveChangesAsync();
+
+            return item;
         }
     }
 }
